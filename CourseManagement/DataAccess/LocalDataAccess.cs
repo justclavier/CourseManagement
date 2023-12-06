@@ -1,8 +1,13 @@
 ﻿using CourseManagement.Common;
 using CourseManagement.DataAccess.DataEntity;
+using CourseManagement.Model;
+using LiveCharts;
+using LiveCharts.Defaults;
+using LiveCharts.Wpf;
 //using System.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 
@@ -113,6 +118,72 @@ namespace CourseManagement.DataAccess
 			}
 
 			return null;
+		}
+
+		public List<CourseSeriesModel> GetCoursePlayRecord()
+		{
+			try
+			{
+				List<CourseSeriesModel> cModelList = new List<CourseSeriesModel>();
+				if (DBConnection())
+				{
+					string userSql = @"select a.course_name,a.course_id,b.play_count,b.is_growing,b.growing_rate,c.platform_name from courses a
+left join play_record b
+on a.course_id=b.course_id
+left join platforms c
+on b.platform_id=c.platform_id
+order by a.course_id,c.platform_id";
+					adapter = new MySqlDataAdapter(userSql, conn);
+
+					DataTable table = new DataTable();
+					int count = adapter.Fill(table);
+
+					string courseId = "";
+					CourseSeriesModel cModel = null;
+
+					foreach (DataRow dr in table.AsEnumerable())
+					{
+						string tempId = dr.Field<string>("course_id");
+						if (courseId != tempId)
+						{
+							courseId = tempId;
+							cModel = new CourseSeriesModel();
+							cModelList.Add(cModel);
+
+							cModel.CourseName = dr.Field<string>("course_id");
+							cModel.SeriesCollection = new LiveCharts.SeriesCollection();
+							cModel.SeriesList = new System.Collections.ObjectModel.ObservableCollection<SeriesModel>();
+						}
+						if (cModel != null)
+						{
+							cModel.SeriesCollection.Add(new PieSeries
+							{
+								Title = dr.Field<string>("platform_name"),
+								Values = new ChartValues<ObservableValue> { new ObservableValue((double)dr.Field<decimal>("play_count")) },
+								DataLabels = false
+							}); ;
+
+							cModel.SeriesList.Add(new SeriesModel
+							{
+								SeriesName = dr.Field<string>("platform_name"),
+								CurrentValue = (int)dr.Field<decimal>("play_count"),
+								IsGrowing = dr.Field<Int32>("is_growing") == 1,
+								ChangeRate = (int)dr.Field<decimal>("growing_rate")
+							});
+						}
+					}
+				}
+				return cModelList;
+			}
+			catch (Exception ex)
+			{
+				throw ex;
+			}
+			finally
+			{
+				conn.Close();
+				this.Dispose();
+			}
 		}
 	}
 }

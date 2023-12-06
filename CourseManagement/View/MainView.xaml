@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CourseManagement"
+		xmlns:converter="clr-namespace:CourseManagement.Converter"
         mc:Ignorable="d" 
 		Title="朝夕教育" Height="800" Width="1250" 
 		FontFamily="Microsoft YaHei" FontWeight="ExtraLight" FontSize="12"
@@ -13,6 +14,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="../Assets/Styles/DefaultStyle.xaml"></ResourceDictionary>
 				<ResourceDictionary>
+					<converter:GenderConverter x:Key="genderConverter"></converter:GenderConverter>
 					<Style x:Key="NavButtonStyle" TargetType="RadioButton">
 						<Setter Property="Foreground" Value="White"></Setter>
 						<Setter Property="Template">
@@ -61,13 +63,45 @@
 							</DataTrigger>
 						</ControlTemplate.Triggers>
 					</ControlTemplate>
+					
+					<Storyboard x:Key="UserInfoStoryboard">
+						<DoubleAnimation Duration="0:0:0.2" To="0" Storyboard.TargetName="tt" Storyboard.TargetProperty="X"></DoubleAnimation>
+					</Storyboard>
+					<Storyboard x:Key="CloseUserInfoStoryboard">
+						<DoubleAnimation Duration="0:0:0.1" Storyboard.TargetName="tt" Storyboard.TargetProperty="X"></DoubleAnimation>
+					</Storyboard>
+					<ControlTemplate TargetType="RadioButton" x:Key="GenderRadioButtonTemplate">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="auto"></ColumnDefinition>
+								<ColumnDefinition></ColumnDefinition>
+							</Grid.ColumnDefinitions>
+							<Border Width="14" Height="14" BorderThickness="1" CornerRadius="7" BorderBrush="#007DFA" Background="White" Margin="5,0" VerticalAlignment="Center">
+								<Border Width="8" Height="8" CornerRadius="4" Background="#007DFA" Name="point" Visibility="Collapsed"></Border>
+							</Border>
+							<ContentControl Content="{TemplateBinding Content}" VerticalAlignment="Center" Grid.Column="1"></ContentControl>
+						</Grid>
+						<ControlTemplate.Triggers>
+							<Trigger Property="IsChecked" Value="True">
+								<Setter Property="Visibility" Value="Visible" TargetName="point"></Setter>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
 				</ResourceDictionary>
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</Window.Resources>
-	<Border Margin="5" CornerRadius="5" Background="White">
+	<Window.Triggers>
+		<EventTrigger RoutedEvent="Button.Click" SourceName="btnUserInfo">
+			<BeginStoryboard Storyboard="{StaticResource UserInfoStoryboard}"></BeginStoryboard>
+		</EventTrigger>
+		<EventTrigger RoutedEvent="Button.Click" SourceName="btnCloseUserInfo">
+			<BeginStoryboard Storyboard="{StaticResource CloseUserInfoStoryboard}"></BeginStoryboard>
+		</EventTrigger>
+	</Window.Triggers>
+	<Border Margin="5" CornerRadius="5" Background="White" Name="layout">
 		<Border.Effect>
-			<DropShadowEffect Color="Gray" ShadowDepth="0" Opacity="0.3" Direction="0"></DropShadowEffect>
+			<DropShadowEffect Color="Gray" ShadowDepth="0" BlurRadius="5" Opacity="0.3" Direction="0"></DropShadowEffect>
 		</Border.Effect>
 		<Grid>
 			<Border Background="#007DFA" Height="200" VerticalAlignment="Top" CornerRadius="5,5,0,0" MouseLeftButtonDown="Border_MouseLeftButtnDown"></Border>
@@ -90,14 +124,20 @@
 						<TextBlock Text="ZHAOXI EDU" Foreground="#88DDDDDD" FontSize="10"></TextBlock>
 					</StackPanel>
 				</StackPanel>
-				
+
 				<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
 					<Border Width="30" Height="30" CornerRadius="15">
 						<Border.Background>
 							<ImageBrush ImageSource="{Binding UserInfo.Avatar}"></ImageBrush>
 						</Border.Background>
 					</Border>
-					<TextBlock Text="{Binding UserInfo.UserName}" VerticalAlignment="Center" Foreground="White" Margin="10,0,0,0"></TextBlock>
+					<Button Content="{Binding UserInfo.UserName}" VerticalAlignment="Center" Cursor="Hand" Foreground="White" Margin="10,0,0,0" Name="btnUserInfo">
+						<Button.Template>
+							<ControlTemplate TargetType="Button">
+								<TextBlock Text="{Binding UserInfo.UserName}"></TextBlock>
+							</ControlTemplate>
+						</Button.Template>
+					</Button>
 				</StackPanel>
 
 				<StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -112,7 +152,57 @@
 
 				<ContentControl Grid.Row="2" Content="{Binding MainContent}"></ContentControl>
 			</Grid>
+			<!--抽屉侧滑栏-->
+			<Border Background="#EE444444" Width="240" HorizontalAlignment="Right" CornerRadius="0,5,5,0">
+				<Border.Effect>
+					<DropShadowEffect Color="Gray" ShadowDepth="0" BlurRadius="5" Opacity="0.3" Direction="180"></DropShadowEffect>
+				</Border.Effect>
+				<Border.RenderTransform>
+					<TranslateTransform X="250" x:Name="tt"></TranslateTransform>
+				</Border.RenderTransform>
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="230"></RowDefinition>
+						<RowDefinition></RowDefinition>
+					</Grid.RowDefinitions>
+					<Button Width="40" Height="40" BorderThickness="0" Content="&#xeb6a;" FontFamily="../Assets/Fonts/#iconfont" VerticalAlignment="Top" HorizontalAlignment="Left" Name="btnCloseUserInfo"></Button>
+					<Border Width="80" Height="80" CornerRadius="40">
+						<Border.Effect>
+							<DropShadowEffect Color="White" ShadowDepth="0" BlurRadius="5" Opacity="0.3" Direction="0"></DropShadowEffect>
+						</Border.Effect>
+						<Border.Background>
+							<ImageBrush ImageSource="{Binding UserInfo.Avatar}"></ImageBrush>
+						</Border.Background>
+					</Border>
+					<Grid Grid.Row="1" Margin="20,0">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="40"></RowDefinition>
+							<RowDefinition Height="40"></RowDefinition>
+							<RowDefinition Height="40"></RowDefinition>
+							<RowDefinition Height="40"></RowDefinition>
+						</Grid.RowDefinitions>
+						<Grid.Resources>
+							<Style TargetType="RadioButton">
+								<Setter Property="Foreground" Value="White"></Setter>
+								<Setter Property="FontSize" Value="14"></Setter>
+							</Style>
+							<Style TargetType="TextBlock">
+								<Setter Property="Foreground" Value="White"></Setter>
+								<Setter Property="FontSize" Value="14"></Setter>
+							</Style>
+						</Grid.Resources>
+						<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+							<TextBlock Text="用户名"></TextBlock>
+							<TextBlock Text="{Binding UserInfo.UserName}" Margin="10,0,0,0"></TextBlock>
+						</StackPanel>
+						<StackPanel Orientation="Horizontal" Grid.Row="1" VerticalAlignment="Center">
+							<TextBlock Text="性   别"></TextBlock>
+							<RadioButton Content="男" Margin="10,0,0,0" Template="{StaticResource GenderRadioButtonTemplate}" IsChecked="{Binding UserInfo.Gender, Converter={StaticResource genderConverter}, ConverterParameter=1}"></RadioButton>
+							<RadioButton Content="女" Margin="10,0,0,0" Template="{StaticResource GenderRadioButtonTemplate}" IsChecked="{Binding UserInfo.Gender, Converter={StaticResource genderConverter}, ConverterParameter=2}"></RadioButton>
+						</StackPanel>
+					</Grid>
+				</Grid>
+			</Border>
 		</Grid>
-
 	</Border>
 </Window>

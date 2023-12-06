@@ -10,9 +10,9 @@ namespace CourseManagement.ViewModel
 	{
 		public UserModel UserInfo { get; set; }
 
-		private int _searchText;
+		private string _searchText;
 
-		public int SearchText
+		public string SearchText
 		{
 			get { return _searchText; }
 			set { _searchText = value; this.DoNotify(); }
@@ -34,6 +34,8 @@ namespace CourseManagement.ViewModel
 			this.NavChangedCommand = new CommandBase();
 			this.NavChangedCommand.DoExecute = new Action<object>(DoNavChanged);
 			this.NavChangedCommand.DoCanExecute = new Func<object, bool>((o) => true);
+
+			DoNavChanged("FirstPageView");
 		}
 
 		private void DoNavChanged(object obj)
