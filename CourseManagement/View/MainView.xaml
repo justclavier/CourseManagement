@@ -99,7 +99,7 @@
 			<BeginStoryboard Storyboard="{StaticResource CloseUserInfoStoryboard}"></BeginStoryboard>
 		</EventTrigger>
 	</Window.Triggers>
-	<Border Margin="5" CornerRadius="5" Background="White" Name="layout">
+	<Border Margin="5" CornerRadius="5" Background="#F7F9FA" Name="layout">
 		<Border.Effect>
 			<DropShadowEffect Color="Gray" ShadowDepth="0" BlurRadius="5" Opacity="0.3" Direction="0"></DropShadowEffect>
 		</Border.Effect>
